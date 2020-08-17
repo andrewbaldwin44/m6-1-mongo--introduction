@@ -29,6 +29,11 @@ async function createGreeting(req, res) {
   }
 }
 
+function capitalizeFirstLetter(string) {
+  string = string.toLowerCase();
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 async function getGreeting(req, res) {
   const { _id } = req.params;
 
@@ -39,12 +44,20 @@ async function getGreeting(req, res) {
   const db = client.db('exercise_1');
 
 
-  db.collection('greetings').findOne({ _id }, (err, result) => {
-    result
-      ? res.status(200).json({ status: 200, _id, data: result })
-      : res.status(404).json({ status: 404, _id, data: "Not Found" });
-    client.close();
-  });
+  db.collection('greetings').findOne(
+    {
+      $or: [
+        { _id: _id.toUpperCase() },
+        { lang: capitalizeFirstLetter(_id) }
+      ]
+    },
+    (err, result) => {
+      result
+        ? res.status(200).json({ status: 200, data: result })
+        : res.status(404).json({ status: 404, data: "Not Found" });
+      client.close();
+    }
+  );
 }
 
 async function getGreetings(req, res) {
@@ -68,8 +81,32 @@ async function getGreetings(req, res) {
   }
 }
 
+async function deleteGreeting(req, res) {
+  const { _id } = req.params;
+
+  try {
+    const client = await MongoClient(MONGO_URI, { useUnifiedTopology: true });
+
+    await client.connect();
+
+    const db = client.db('exercise_1');
+
+    const databaseResponse = await db.collection("greetings").deleteOne({ _id });
+
+    assert.equal(1, databaseResponse.deletedCount);
+
+    client.close();
+
+    res.status(204).json({ status: 204, data: _id });
+  }
+  catch ({ message }) {
+    res.status(500).json({ status: 500, message })
+  }
+}
+
 module.exports = {
   createGreeting,
   getGreeting,
   getGreetings,
+  deleteGreeting,
 };
