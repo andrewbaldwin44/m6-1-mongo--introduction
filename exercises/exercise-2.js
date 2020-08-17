@@ -104,9 +104,40 @@ async function deleteGreeting(req, res) {
   }
 }
 
+async function updateGreeting(req, res) {
+  const { _id } = req.params;
+  const { hello } = req.body;
+
+  try {
+    if (!hello) throw new Error('Invalid request');
+
+    const client = await MongoClient(MONGO_URI, { useUnifiedTopology: true });
+
+    await client.connect();
+
+    const db = client.db('exercise_1');
+
+    const newValues = { $set: { hello } };
+
+    const databaseResponse = await db.collection("greetings")
+                                     .updateOne({ _id }, { ...newValues});
+
+    assert.equal(1, databaseResponse.matchedCount);
+    assert.equal(1, databaseResponse.modifiedCount);
+
+    client.close();
+
+    res.status(200).json({ status: 200, data: { _id, hello } });
+  }
+  catch ({ message }) {
+    res.status(500).json({ status: 500, message })
+  }
+}
+
 module.exports = {
   createGreeting,
   getGreeting,
   getGreetings,
   deleteGreeting,
+  updateGreeting,
 };
