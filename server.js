@@ -10,6 +10,7 @@ const { addUser } = require("./exercises/exercise-1.4");
 const {
   createGreeting,
   getGreeting,
+  getGreetings,
 } = require('./exercises/exercise-2');
 
 const PORT = process.env.PORT || 8000;
@@ -26,6 +27,7 @@ express()
 
   .post('/exercise-2/greeting', createGreeting)
   .get('/exercise-2/greeting/:_id', getGreeting)
+  .get('/exercise-2/greetings', getGreetings)
 
   .get('/*', (req, res) => res.status(404).type("txt").send("🤷‍♂️"))
 

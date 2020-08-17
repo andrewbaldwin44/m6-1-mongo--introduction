@@ -4,6 +4,10 @@ const assert = require('assert');
 require("dotenv").config();
 const { MONGO_URI } = process.env;
 
+const {
+  paginateModel,
+} = require('./paginateModel');
+
 async function createGreeting(req, res) {
   try {
     const client = await MongoClient(MONGO_URI, { useUnifiedTopology: true });
@@ -43,7 +47,29 @@ async function getGreeting(req, res) {
   });
 }
 
+async function getGreetings(req, res) {
+  let { page, limit } = req.query;
+
+  const client = await MongoClient(MONGO_URI, { useUnifiedTopology: true });
+
+  await client.connect();
+
+  const db = client.db('exercise_1');
+
+  const greetings = await db.collection('greetings').find().toArray();
+
+  const paginatedGreetings = paginateModel(greetings, page, limit);
+
+  if (greetings.length > 0) {
+    res.status(200).json({ status: 200, ...paginatedGreetings });
+  }
+  else {
+    res.status(404).json({ status: 404, message: 'Greetings not found!' });
+  }
+}
+
 module.exports = {
   createGreeting,
   getGreeting,
+  getGreetings,
 };
