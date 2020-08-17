@@ -121,3 +121,5 @@ Open this exercise file: [exercise-2.6.md](__workshop/exercise-2.6.md)
 <center>🟡 - Minimally complete workshop (75%) - 🟡</center>
 
 ---
+andrew
+u42CTLWosM9JTPz0
